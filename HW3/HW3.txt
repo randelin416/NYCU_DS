@@ -1,0 +1,9 @@
+資料結構HW3
+
+Leetcode
+84. Largest Rectangle in Histogram
+114. Flatten Binary Tree to Linked List
+230. Kth Smallest Element in a BST
+215. Kth Largest Element in an Array
+23. Merge k Sorted Lists
+98. Validate Binary Search Tree
