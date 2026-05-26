@@ -39,7 +39,7 @@ char MyStack::top()
     if (!empty()) {
         return _arr[_top];
     }
-    throw std::runtime_error("Stack is empty");
+    return '\0';
 }
 
 

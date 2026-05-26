@@ -3,14 +3,16 @@
 #include <iostream>
 
 MyCalculator::MyCalculator(const string& infix) : _infix(infix) {
+    _infix = infix;
     _postfix = toPostfix();
 }
 
 string MyCalculator::infix() {
-    string cleanInfix = "";
-    // remove spaces
-    for (char c : _infix) if (c != ' ') cleanInfix += c;
-    return cleanInfix;
+    string res = "";
+    for (char c : _infix) {
+        if (c != ' ') res += c;
+    }
+    return res;
 }
 
 string MyCalculator::postfix() {
@@ -19,44 +21,70 @@ string MyCalculator::postfix() {
 
 string MyCalculator::toPostfix() {
     string res = "";
-    string cleanInfix = infix();
-    MyStack s(100);
+    string s = infix();
+    MyStack opStack(100);
 
     // infix to postfix
-    for (char c : cleanInfix) {
+    for (char c : s) {
         if (c >= '0' && c <= '9') {
             res += c;
-        } else {
+        }
+        else if (c == '(') {
+            opStack.push(c);
+        }
+        else if (c == ')') {
+            while (!opStack.empty() && opStack.top() != '(') {
+                res += opStack.top();
+                opStack.pop();
+            }
+            if (!opStack.empty()) opStack.pop(); // pop '('
+        }
+        else if (c == '+' || c == '-' || c == '*') {
             int currP = (c == '*') ? 2 : 1;
-            // pop operators
-            while (!s.empty()) {
-                int topP = (s.top() == '*') ? 2 : 1;
+
+            while (!opStack.empty() && opStack.top() != '(') {
+                char top = opStack.top();
+                int topP = (top == '*') ? 2 : 1;
+
                 if (topP >= currP) {
-                    res += s.top();
-                    s.pop();
+                    res += top;
+                    opStack.pop();
                 } else break;
             }
-            s.push(c);
+            opStack.push(c);
         }
     }
-    while (!s.empty()) { res += s.top(); s.pop(); } // pop remaining operators
+    // pop remaining operators
+    while (!opStack.empty()) {
+        res += opStack.top();
+        opStack.pop();
+    }
     return res;
 }
 
 int MyCalculator::evaluate() {
-    MyStack s(100);
     // postfix evaluation
+    int valStack[100];
+    int top = -1;
+    
+
     for (char c : _postfix) {
-        // evaluate the expression
+
+        // number
         if (c >= '0' && c <= '9') {
-            s.push(c - '0');
-        } else {
-            int b = s.top(); s.pop();
-            int a = s.top(); s.pop();
-            if (c == '+') s.push(a + b);
-            else if (c == '-') s.push(a - b);
-            else if (c == '*') s.push(a * b);
+            valStack[++top] = c - '0';
+        }
+
+        // operator
+        else {
+            int b = valStack[top--];
+            int a = valStack[top--];
+
+            if (c == '+') valStack[++top] = a + b;
+            else if (c == '-') valStack[++top] = a - b;
+            else if (c == '*') valStack[++top] = a * b;
         }
     }
-    return s.top();
+
+    return valStack[top];
 }

@@ -64,3 +64,114 @@ int main() {
   4. Implement the buildTree() function to read 'N', read the values, create the nodes, insert
      them into your tree, and return the tree pointer.
 */
+struct AVLNode : public CrystalTreeBase::Node {
+    int energy, height;
+    AVLNode(int v) : energy(v), height(1) {}
+};
+
+struct AVLTree : public CrystalTreeBase {
+private:
+    int getHeight(shared_ptr<AVLNode> node) {
+        if(!node) return 0;
+        return node -> height;
+    }
+    int balance(shared_ptr<AVLNode> node) {
+        if(!node) return 0;
+        return getHeight(dynamic_pointer_cast<AVLNode> (node->left)) - getHeight(dynamic_pointer_cast<AVLNode> (node->right));
+    }
+    void inorder(shared_ptr<Node> node) const {
+        if(!node) return;
+        inorder(node -> left);
+        auto n = dynamic_pointer_cast<AVLNode>(node);
+        cout << n -> energy << " ";
+        inorder(node -> right);
+    }
+    void preorder(shared_ptr<Node> node) const {
+        if(!node) return;
+        auto n = dynamic_pointer_cast<AVLNode>(node);
+        cout << n -> energy << " ";
+        preorder(node -> left);
+        preorder(node -> right);
+    }
+    // left rotation
+    shared_ptr<AVLNode> leftRotate(shared_ptr<AVLNode> node) {
+        auto r = dynamic_pointer_cast<AVLNode> (node -> right);
+        auto rl = dynamic_pointer_cast<AVLNode> (r -> left);
+
+        r -> left = node;
+        node -> right = rl;
+
+        node -> height = 1 + max(getHeight(dynamic_pointer_cast<AVLNode> (node -> left)), getHeight(dynamic_pointer_cast<AVLNode> (node -> right)));
+        r -> height = 1 + max(getHeight(dynamic_pointer_cast<AVLNode> (r -> left)), getHeight(dynamic_pointer_cast<AVLNode> (r -> right)));
+    }
+    // right rotation
+    shared_ptr<AVLNode> rightRotate(shared_ptr<AVLNode> node) {
+        auto l = dynamic_pointer_cast<AVLNode>(node -> left);
+        auto lr = dynamic_pointer_cast<AVLNode>(l -> right);
+
+        l -> right = node;
+        node -> left = lr;
+
+        node -> height = 1 + max(getHeight(dynamic_pointer_cast<AVLNode>(node -> left)), getHeight(dynamic_pointer_cast<AVLNode>(node -> right)));
+        l -> height = 1 + max(getHeight(dynamic_pointer_cast<AVLNode>(l -> left)), getHeight(dynamic_pointer_cast<AVLNode>(l -> right)));
+    }
+    // insert (RR, RL, LL, LR)
+    shared_ptr<AVLNode> insert(shared_ptr<AVLNode> node, int val) {
+        // insert the node to left or right child by recursion
+        if(!node) {
+            make_shared<AVLNode>(val);
+        }
+        if (val < node -> energy) {
+            node -> left = insert(dynamic_pointer_cast<AVLNode>(node -> left), val);
+        } else {
+            node -> right = insert(dynamic_pointer_cast<AVLNode>(node -> right), val);
+        }
+
+        // get the balanced factor
+        int b = balance(node);
+
+        // RR
+        if ((b < -1) && (val > dynamic_pointer_cast<AVLNode>(node -> right) -> energy)) {
+            return rightRotate(node);
+        }
+        // LL
+        if ((b > 1) && (val < dynamic_pointer_cast<AVLNode>(node -> left) -> energy)) {
+            return leftRotate(node);
+        }
+        // RL
+        if ((b < -1) && (val < dynamic_pointer_cast<AVLNode>(node -> left) -> energy)) {
+            node -> left = leftRotate(dynamic_pointer_cast<AVLNode>(node -> left));
+            return rightRotate(node);
+        }
+        // LR
+        if((b < -1) && (val > dynamic_pointer_cast<AVLNode>(node -> right) -> energy)) {
+            node -> right = rightRotate(dynamic_pointer_cast<AVLNode>(node -> right));
+            return leftRotate(node);
+        }
+    }
+public:
+    void insert(shared_ptr<Node> node) override {
+
+    }
+    void printPreorder() {
+        preorder(root);
+    }
+    void printInorder() {
+        inorder(root);
+    }
+};
+
+shared_ptr<CrystalTreeBase> buildTree() {
+    int n;
+    cin >> n;
+
+    auto tree = make_shared<AVLTree>();
+
+    for(int i = 0; i < n; i++) {
+        int val;
+        cin >> val;
+        tree -> insert(make_shared<AVLNode>(val));
+    }
+
+    return tree;
+}
