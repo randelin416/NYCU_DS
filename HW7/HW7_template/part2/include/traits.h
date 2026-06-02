@@ -13,6 +13,7 @@ struct DataTraits {
     
     static T apply(T a, T b) {
         // Implement addition logic
+        return a + b;
     }
 };
 
@@ -21,10 +22,15 @@ template <>
 struct DataTraits<std::string> {
     static std::string identity() {
         // Return identity element for string
+        return "";
     }
     
     static std::string apply(std::string a, std::string b) {
         // Implement concatenation logic with ", "
+        if (a.empty()) {
+            return b;
+        }
+        return a + ", " + b;
     }
 };
 

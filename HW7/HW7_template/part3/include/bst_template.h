@@ -28,21 +28,65 @@ public:
     
     // TODO: Implement destructor to prevent memory leaks
     ~BinarySearchTree() {
-        
+        clear(root);
     }
 
     // TODO: Implement insert using Compare::compare(a, b)
     void insert(T value) {
-        
+        root = insertNode(root, value);
     }
 
     // TODO: Implement search
     bool search(T value) {
-        
+        TreeNode<T>* curr = root;
+
+        while (curr) {
+            if (!Compare::compare(value, curr->value) &&
+                !Compare::compare(curr->value, value)) {
+                return true;
+            }
+
+            if (Compare::compare(value, curr->value)) {
+                curr = curr->left;
+            } else {
+                curr = curr->right;
+            }
+        }
+
+        return false;
     }
 
 private:
     TreeNode<T>* root;
+
+    // My code
+    TreeNode<T>* insertNode(TreeNode<T>* node, T value) {
+        if (!node) {
+            return new TreeNode<T>(value);
+        }
+
+        // duplicate: do nothing
+        if (!Compare::compare(value, node->value) &&
+            !Compare::compare(node->value, value)) {
+            return node;
+        }
+
+        if (Compare::compare(value, node->value)) {
+            node->left = insertNode(node->left, value);
+        } else {
+            node->right = insertNode(node->right, value);
+        }
+
+        return node;
+    }
+
+    void clear(TreeNode<T>* node) {
+        if (!node) return;
+
+        clear(node->left);
+        clear(node->right);
+        delete node;
+    }
 };
 
 #endif
